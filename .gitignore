@@ -1,0 +1,8 @@
+#Folder
+.vscode/
+node_modules/
+
+#Temp File
+*.swp
+
+package-lock.json
