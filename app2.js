@@ -3,7 +3,6 @@ var server = require('http').createServer(app);
 // http server를 scoket.io server로 upgrade
 var io = require('socket.io')(server);
 
-
 // namespace
 var nsp = io.of('/my-namespace');
 
