@@ -26,6 +26,7 @@
     <script>
         $(function(){
             // socket.io 서버에 접속
+            // namespace를 지정하지 않았으므로 default namespace('/')로 접속
             // var socket = io();
             
             // 지정 namespace로 접속
@@ -38,7 +39,7 @@
             });
 
             // 서버로부터의 메시지가 수신되면
-            socket.on('chat', function(data) {
+            socket.on('chat message', function(data) {
                 $('#chatLogs').append("<div>" + data.msg + " : from <strong>" + data.from.name + "</strong></div>");
             });
 
@@ -49,7 +50,7 @@
                 var $msgForm = $('#msgForm');
 
                 // 서버로 메시지를 전송한다.
-                socket.emit('chat', { msg: $msgForm.val() });
+                socket.emit('chat message', { msg: $msgForm.val() });
                 $msgForm.val('');                
             });
 
