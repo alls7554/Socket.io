@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    
+    <title>Socket.io Chat Example</title>
+</head>
+<body>
+    <div class="container">
+        <h3>Socket.io Chat Example</h3>
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label for="name" class="col-sm-2 control-label">Name</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="name" placeholder="Name">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="room" class="col-sm-2 control-label">Room</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="room" placeholder="Room (0 ~ 9으로 구성된 한 자리 수)">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" class="btn btn-default" id="login" style="float: left;">Login</button>
+                    <button type="submit" class="btn btn-default" id="logout" style="float:right">LogOut</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="msg" class="col-sm-2 control-label">Message</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="msg" placeholder="Message">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" class="btn btn-default" id="send">Send</button>
+                </div>
+            </div>
+        </form>
+        <ul id="chat"></ul>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        $(function(){
+            var chat = io('/chat');
+            var roomExRe = new RegExp('^[0-9]$');
+
+            // 첫 접속시 로그인이 되어있지 않으므로 logout버튼과 Send버튼 비활성화
+            $('#logout').attr('disabled', true);
+            $('#send').attr('disabled', true);
+
+            $('#login').click(function(e) {
+                e.preventDefault();
+                
+                var name = $('#name').val();
+                var room = $('#room').val();
+
+                console.log(room);
+                
+                if( !name ) {
+                    alert('이름 입력 요망');
+                    return;
+                }
+                
+                if(room == ''  ||  !roomExRe.test(room)) {
+                    alert('Room 입력 요망 (0 ~ 9으로 구성된 한 자리 수)');
+                    return;
+                }
+
+                chat.emit('login', {
+                    name, room
+                });
+                
+                // 로그인 시 name, room 입력칸과 login버튼을 비활성화하고 logout와 Send버튼을 활성화
+                $('#name').attr('disabled', true);
+                $('#room').attr('disabled', true);
+                $('#login').attr('disabled', true);
+                $('#logout').attr('disabled', false);
+                $('#send').attr('disabled', false);
+            });
+
+            chat.on('logon', function(data) {
+                $('#chat').append('<li>'+data+'님이 입장하셨습니다.</li>');
+            });
+
+            $('#logout').click(function(e) {
+                e.preventDefault();
+
+                chat.emit('logout', {
+                    name: $('#name').val(),
+                    room: $('#room').val()
+                });
+
+                // 로그인 시 name, room 입력칸과 login버튼을 활성화하고 logout와 Send버튼을 비활성화
+                $('#name').attr('disabled', false);
+                $('#room').attr('disabled', false);
+                $('#login').attr('disabled', false);
+                $('#logout').attr('disabled', true);
+                $('#send').attr('disabled', true);
+            })
+            chat.on('logout', function(data) {
+                $('#chat').append('<li>'+data+'님이 퇴장하셨습니다.</li>');
+            });
+            
+            $('#send').click(function(e) {
+                e.preventDefault();
+
+                chat.emit('chat message', {
+                    name: $('#name').val(),
+                    room: $('#room').val(),
+                    msg: $('#msg').val()
+                });
+            });
+
+            chat.on('receive message', function(data){
+                $('#chat').append('<li>'+data.name+' : '+data.msg+'</li>');
+            });
+        });
+    </script>
+</body>
+</html>
