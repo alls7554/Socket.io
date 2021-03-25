@@ -54,6 +54,7 @@
 
             // 첫 접속시 로그인이 되어있지 않으므로 logout버튼과 Send버튼 비활성화
             $('#logout').attr('disabled', true);
+            $('#msg').attr('disabled', true);
             $('#send').attr('disabled', true);
 
             $('#login').click(function(e) {
@@ -83,6 +84,7 @@
                 $('#room').attr('disabled', true);
                 $('#login').attr('disabled', true);
                 $('#logout').attr('disabled', false);
+                $('#msg').attr('disabled', false);
                 $('#send').attr('disabled', false);
             });
 
@@ -98,11 +100,13 @@
                     room: $('#room').val()
                 });
 
-                // 로그인 시 name, room 입력칸과 login버튼을 활성화하고 logout와 Send버튼을 비활성화
+                // 로그아웃 시 name, room 입력칸과 login버튼을 활성화하고 logout와 Send버튼을 비활성화
                 $('#name').attr('disabled', false);
                 $('#room').attr('disabled', false);
                 $('#login').attr('disabled', false);
                 $('#logout').attr('disabled', true);
+                $('#msg').val('');
+                $('#msg').attr('disabled', true);
                 $('#send').attr('disabled', true);
             })
             chat.on('logout', function(data) {
@@ -112,11 +116,13 @@
             $('#send').click(function(e) {
                 e.preventDefault();
 
+                
                 chat.emit('chat message', {
                     name: $('#name').val(),
                     room: $('#room').val(),
                     msg: $('#msg').val()
                 });
+                $('#msg').val('');
             });
 
             chat.on('receive message', function(data){
